@@ -1,11 +1,11 @@
-Pim\Bundle\MagentoConnectorBundle\Entity\ProductExport:
+Pim\Bundle\MagentoConnectorBundle\Entity\DeltaProductExport:
     type: entity
-    table: pim_delta_product_export
+    table: pim_magento_delta_product_export
     indexes:
         searchcode_idx:
             columns:
                 - id
-    repositoryClass: Pim\Bundle\MagentoConnectorBundle\Entity\Repository\ProductExportRepository
+    repositoryClass: Pim\Bundle\MagentoConnectorBundle\Entity\Repository\DeltaProductExportRepository
     uniqueConstraints:
         searchunique_idx:
             columns:
@@ -16,8 +16,9 @@ Pim\Bundle\MagentoConnectorBundle\Entity\ProductExport:
             id: true
             generator:
                 strategy: AUTO
-        date:
+        lastExport:
             type: datetime
+            column: last_export
     manyToOne:
         product:
             targetEntity: Pim\Bundle\CatalogBundle\Model\ProductInterface

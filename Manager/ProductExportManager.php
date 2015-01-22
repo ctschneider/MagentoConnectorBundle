@@ -92,24 +92,24 @@ class ProductExportManager
 
             if (null === $productExport) {
                 $sql = '
-                    INSERT INTO pim_magento_product_export
-                    (product_id, job_instance_id, date)
-                    VALUES (:product_id, :job_instance_id, :date)
+                    INSERT INTO pim_magento_delta_product_export
+                    (product_id, job_instance_id, last_export)
+                    VALUES (:product_id, :job_instance_id, :last_export)
                 ';
             } else {
                 $sql = '
-                    UPDATE pim_magento_product_export
-                    SET date = :date
+                    UPDATE pim_magento_delta_product_export
+                    SET last_export = :last_export
                     WHERE product_id = :product_id AND job_instance_id = :job_instance_id
                 ';
             }
 
             $q = $conn->prepare($sql);
-            $date = $now->format('Y-m-d H:i:s');
+            $last_export = $now->format('Y-m-d H:i:s');
             $productId = $product->getId();
             $jobInstanceId = $jobInstance->getId();
 
-            $q->bindParam(':date', $date, PDO::PARAM_STR);
+            $q->bindParam(':last_export', $last_export, PDO::PARAM_STR);
             $q->bindParam(':product_id', $productId, PDO::PARAM_INT);
             $q->bindParam(':job_instance_id', $jobInstanceId, PDO::PARAM_INT);
             $q->execute();

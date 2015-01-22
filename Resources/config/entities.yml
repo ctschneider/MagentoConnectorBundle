@@ -1,8 +1,9 @@
 parameters:
-    pim_magento_connector.entity.category_mapping.class:  Pim\Bundle\MagentoConnectorBundle\Entity\MagentoCategoryMapping
-    pim_magento_connector.entity.family_mapping.class:    Pim\Bundle\MagentoConnectorBundle\Entity\MagentoFamilyMapping
-    pim_magento_connector.entity.group_mapping.class:     Pim\Bundle\MagentoConnectorBundle\Entity\MagentoGroupMapping
-    pim_magento_connector.entity.attribute_mapping.class: Pim\Bundle\MagentoConnectorBundle\Entity\MagentoAttributeMapping
-    pim_magento_connector.entity.simple_mapping.class:    Pim\Bundle\MagentoConnectorBundle\Entity\SimpleMapping
-    pim_magento_connector.entity.product_export.class:    Pim\Bundle\MagentoConnectorBundle\Entity\ProductExport
-    pim_magento_connector.entity.simple_mapping.class:    Pim\Bundle\MagentoConnectorBundle\Entity\SimpleMapping
+    pim_magento_connector.entity.category_mapping.class:          Pim\Bundle\MagentoConnectorBundle\Entity\MagentoCategoryMapping
+    pim_magento_connector.entity.family_mapping.class:            Pim\Bundle\MagentoConnectorBundle\Entity\MagentoFamilyMapping
+    pim_magento_connector.entity.group_mapping.class:             Pim\Bundle\MagentoConnectorBundle\Entity\MagentoGroupMapping
+    pim_magento_connector.entity.attribute_mapping.class:         Pim\Bundle\MagentoConnectorBundle\Entity\MagentoAttributeMapping
+    pim_magento_connector.entity.simple_mapping.class:            Pim\Bundle\MagentoConnectorBundle\Entity\SimpleMapping
+    pim_magento_connector.entity.simple_mapping.class:            Pim\Bundle\MagentoConnectorBundle\Entity\SimpleMapping
+    pim_magento_connector.entity.delta_product_export.class:      Pim\Bundle\MagentoConnectorBundle\Entity\DeltaProductExport
+    pim_magento_connector.entity.delta_configurable_export.class: Pim\Bundle\MagentoConnectorBundle\Entity\DeltaConfigurableExport

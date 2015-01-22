@@ -1,0 +1,34 @@
+Pim\Bundle\MagentoConnectorBundle\Entity\DeltaConfigurableExport:
+    type: entity
+    table: pim_magento_delta_configurable_export
+    indexes:
+        searchcode_idx:
+            columns:
+                - id
+    repositoryClass: Pim\Bundle\MagentoConnectorBundle\Entity\Repository\DeltaConfigurableExportRepository
+    uniqueConstraints:
+        searchunique_idx:
+            columns:
+                - id
+    fields:
+        id:
+            type: integer
+            id: true
+            generator:
+                strategy: AUTO
+        lastExport:
+            type: datetime
+            column: last_export
+    manyToOne:
+        product:
+            targetEntity: Pim\Bundle\CatalogBundle\Model\ProductInterface
+            joinColumns:
+                product_id:
+                    referencedColumnName: id
+                    onDelete: CASCADE
+        jobInstance:
+            targetEntity: Akeneo\Bundle\BatchBundle\Entity\JobInstance
+            joinColumns:
+                job_instance_id:
+                    referencedColumnName: id
+                    onDelete: CASCADE

@@ -24,12 +24,4 @@ class DeltaProductWriterSpec extends ObjectBehavior
     ) {
         $this->beConstructedWith($webserviceGuesser, $channelManager, $productExportManager, $clientParametersRegistry);
     }
-
-    function it_sets_step_execution(StepExecution $stepExecution, JobExecution $jobExecution)
-    {
-        $stepExecution->getJobExecution()->willReturn($jobExecution);
-        $jobExecution->getJobInstance()->shouldBeCalled();
-
-        $this->setStepExecution($stepExecution);
-    }
 }

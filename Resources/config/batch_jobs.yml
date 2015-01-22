@@ -53,7 +53,7 @@ connector:
                 export_simple_products:
                     title:     pim_magento_connector.steps.simple_product_export.export.title
                     services:
-                        reader:    pim_magento_connector.reader.doctrine.product
+                        reader:    pim_magento_connector.reader.doctrine.product_delta
                         processor: pim_magento_connector.processor.product
                         writer:    pim_magento_connector.writer.product_delta
                     parameters:
@@ -61,9 +61,9 @@ connector:
                 export_configurable_product:
                     title:     pim_magento_connector.steps.configurable_product_export.export.title
                     services:
-                        reader:    pim_base_connector.reader.doctrine.product
+                        reader:    pim_magento_connector.reader.orm.configurable_delta
                         processor: pim_magento_connector.processor.configurable
-                        writer:    pim_magento_connector.writer.product
+                        writer:    pim_magento_connector.writer.configurable_delta
                     parameters:
                         batch_size: 1
                 export_product_association:
@@ -74,16 +74,6 @@ connector:
                         writer:    pim_magento_connector.writer.product_association
                     parameters:
                         batch_size: 1
-                prune_simple_products:
-                    title: pim_magento_connector.steps.simple_product_clean.clean.title
-                    class: "%pim_magento_connector.step.prune.class%"
-                    services:
-                        cleaner: pim_magento_connector.cleaner.product
-                prune_configurable_products:
-                    title: pim_magento_connector.steps.configurable_product_clean.clean.title
-                    class: "%pim_magento_connector.step.prune.class%"
-                    services:
-                        cleaner: pim_magento_connector.cleaner.configurable
 
         magento_category_export:
             title: pim_magento_connector.jobs.category_export.title

@@ -1,10 +1,12 @@
 parameters:
-    pim_magento_connector.reader.orm.bulk_entity.class:       Pim\Bundle\MagentoConnectorBundle\Reader\ORM\BulkEntityReader
-    pim_magento_connector.reader.orm.category.class:          Pim\Bundle\MagentoConnectorBundle\Reader\ORM\CategoryReader
-    pim_magento_connector.reader.orm.grouped_option.class:    Pim\Bundle\MagentoConnectorBundle\Reader\ORM\GroupedOptionReader
-    pim_magento_connector.reader.orm.attribute.class:         Pim\Bundle\MagentoConnectorBundle\Reader\ORM\AttributeReader
-    pim_magento_connector.reader.doctrine.product.class:      Pim\Bundle\MagentoConnectorBundle\Reader\ProductReader
-    pim_base_connector.reader.doctrine.obsoleteproduct.class: Pim\Bundle\BaseConnectorBundle\Reader\Doctrine\ObsoleteProductReader
+    pim_magento_connector.reader.orm.bulk_entity.class:        Pim\Bundle\MagentoConnectorBundle\Reader\ORM\BulkEntityReader
+    pim_magento_connector.reader.orm.category.class:           Pim\Bundle\MagentoConnectorBundle\Reader\ORM\CategoryReader
+    pim_magento_connector.reader.orm.grouped_option.class:     Pim\Bundle\MagentoConnectorBundle\Reader\ORM\GroupedOptionReader
+    pim_magento_connector.reader.orm.attribute.class:          Pim\Bundle\MagentoConnectorBundle\Reader\ORM\AttributeReader
+    pim_magento_connector.reader.doctrine.product.class:       Pim\Bundle\MagentoConnectorBundle\Reader\ProductReader
+    pim_base_connector.reader.doctrine.obsoleteproduct.class:  Pim\Bundle\BaseConnectorBundle\Reader\Doctrine\ObsoleteProductReader
+    pim_magento_connector.reader.orm.configurable_delta.class: Pim\Bundle\MagentoConnectorBundle\Reader\DeltaConfigurableReader
+    pim_magento_connector.reader.orm.product_delta.class:      Pim\Bundle\MagentoConnectorBundle\Reader\DeltaProductReader
 
 services:
     pim_magento_connector.reader.doctrine.bulk_simple_product:
@@ -53,6 +55,10 @@ services:
         arguments:
             - @pim_magento_connector.manager.product_export
 
+    pim_magento_connector.reader.doctrine.product_delta:
+        class: %pim_magento_connector.reader.orm.product_delta.class%
+        parent: pim_base_connector.reader.doctrine.product
+
     pim_magento_connector.reader.doctrine.product_value:
         class: %pim_magento_connector.reader.doctrine.product.class%
         parent: pim_base_connector.reader.doctrine.product
@@ -66,3 +72,10 @@ services:
             - '@pim_catalog.manager.channel'
             - '@pim_catalog.manager.completeness'
             - '@pim_transform.converter.metric'
+
+    pim_magento_connector.reader.orm.configurable_delta:
+        class: %pim_magento_connector.reader.orm.configurable_delta.class%
+        parent: pim_base_connector.reader.doctrine.product
+        arguments:
+            - true
+            - %pim_catalog.entity.product.class%

@@ -6,6 +6,7 @@ parameters:
     pim_magento_connector.writer.option.class:              Pim\Bundle\MagentoConnectorBundle\Writer\OptionWriter
     pim_magento_connector.writer.attribute.class:           Pim\Bundle\MagentoConnectorBundle\Writer\AttributeWriter
     pim_magento_connector.writer.family.class:              Pim\Bundle\MagentoConnectorBundle\Writer\AttributeSetWriter
+    pim_magento_connector.writer.configurable_delta.class:  Pim\Bundle\MagentoConnectorBundle\Writer\DeltaConfigurableWriter
 
 services:
     pim_magento_connector.writer.product:
@@ -18,11 +19,17 @@ services:
 
     pim_magento_connector.writer.product_delta:
         class: %pim_magento_connector.writer.product_delta.class%
+        parent: pim_magento_connector.writer.product
         arguments:
-            - '@pim_magento_connector.guesser.magento_webservice'
-            - '@pim_catalog.manager.channel'
             - '@pim_magento_connector.manager.product_export'
-            - '@pim_magento_connector.webservice.magento_soap_client_parameters_registry'
+        calls:
+            - [setEventDispatcher, [@event_dispatcher]]
+
+    pim_magento_connector.writer.configurable_delta:
+        class: %pim_magento_connector.writer.configurable_delta.class%
+        parent: pim_magento_connector.writer.product
+        arguments:
+            - '@pim_magento_connector.manager.configurable_export'
         calls:
             - [setEventDispatcher, [@event_dispatcher]]
 

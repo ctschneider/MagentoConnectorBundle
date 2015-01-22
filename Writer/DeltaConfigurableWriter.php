@@ -2,38 +2,38 @@
 
 namespace Pim\Bundle\MagentoConnectorBundle\Writer;
 
-use Pim\Bundle\MagentoConnectorBundle\Manager\ProductExportManager;
+use Pim\Bundle\MagentoConnectorBundle\Manager\ConfigurableExportManager;
 use Pim\Bundle\CatalogBundle\Manager\ChannelManager;
 use Pim\Bundle\MagentoConnectorBundle\Guesser\WebserviceGuesser;
 use Pim\Bundle\MagentoConnectorBundle\Webservice\MagentoSoapClientParametersRegistry;
 
 /**
- * Write delta published product in Magento
+ * Write configurable in Magento
  *
  * @author    Romain Monceau <romain@akeneo.com>
  * @copyright 2014 Akeneo SAS (http://www.akeneo.com)
  * @license   http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
-class DeltaProductWriter extends ProductWriter
+class DeltaConfigurableWriter extends ProductWriter
 {
-    /** @var ProductExportManager */
-    protected $productExportManager;
+    /** @var ConfigurableExportManager */
+    protected $configExportManager;
 
     /**
      * @param WebserviceGuesser                   $webserviceGuesser
      * @param ChannelManager                      $channelManager
      * @param MagentoSoapClientParametersRegistry $clientParametersRegistry
-     * @param ProductExportManager                $productExportManager
+     * @param ConfigurableExportManager           $configExportManager
      */
     public function __construct(
         WebserviceGuesser $webserviceGuesser,
         ChannelManager $channelManager,
         MagentoSoapClientParametersRegistry $clientParametersRegistry,
-        ProductExportManager $productExportManager
+        ConfigurableExportManager $configExportManager
     ) {
         parent::__construct($webserviceGuesser, $channelManager, $clientParametersRegistry);
 
-        $this->productExportManager = $productExportManager;
+        $this->configExportManager = $configExportManager;
     }
 
     /**
@@ -47,7 +47,8 @@ class DeltaProductWriter extends ProductWriter
 
         parent::computeProduct($product);
 
-        $this->productExportManager->updateProductExport($sku, $this->getJobInstance());
+        $sku = substr($sku, 5); // due to "conf-" prefix for configurables
+        $this->configExportManager->setLastExportDate($sku, $this->getJobInstance());
     }
 
     /**

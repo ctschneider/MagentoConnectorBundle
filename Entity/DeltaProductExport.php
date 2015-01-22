@@ -6,15 +6,19 @@ use Akeneo\Bundle\BatchBundle\Entity\JobInstance;
 use Pim\Bundle\CatalogBundle\Model\ProductInterface;
 
 /**
- * ProductExport
+ * Delta published product export entity
+ *
+ * @author    Romain Monceau <romain@akeneo.com>
+ * @copyright 2015 Akeneo SAS (http://www.akeneo.com)
+ * @license   http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
-class ProductExport
+class DeltaProductExport
 {
-    /** @var integer */
+    /** @var int */
     protected $id;
 
     /** @var \DateTime */
-    protected $date;
+    protected $lastExport;
 
     /** @var ProductInterface */
     protected $product;
@@ -31,13 +35,13 @@ class ProductExport
     }
 
     /**
-     * @param \DateTime $date
+     * @param \DateTime $lastExport
      *
-     * @return ProductExport
+     * @return DeltaProductExport
      */
-    public function setDate($date)
+    public function setLastExport($lastExport)
     {
-        $this->date = $date;
+        $this->lastExport = $lastExport;
 
         return $this;
     }
@@ -45,15 +49,15 @@ class ProductExport
     /**
      * @return \DateTime
      */
-    public function getDate()
+    public function getLastExport()
     {
-        return $this->date;
+        return $this->lastExport;
     }
 
     /**
      * @param ProductInterface $product
      *
-     * @return ProductExport
+     * @return DeltaProductExport
      */
     public function setProduct(ProductInterface $product = null)
     {
@@ -73,7 +77,7 @@ class ProductExport
     /**
      * @param JobInstance $jobInstance
      *
-     * @return ProductExport
+     * @return DeltaProductExport
      */
     public function setJobInstance(JobInstance $jobInstance = null)
     {
