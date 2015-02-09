@@ -6,6 +6,7 @@ use PDO;
 use Doctrine\ORM\EntityManager;
 use Pim\Bundle\CatalogBundle\Model\AbstractProduct;
 use Akeneo\Bundle\BatchBundle\Entity\JobInstance;
+use Pim\Bundle\CatalogBundle\Model\ProductInterface;
 
 /**
  * Product export manager to update and create product export entities
@@ -16,6 +17,12 @@ use Akeneo\Bundle\BatchBundle\Entity\JobInstance;
  */
 class ProductExportManager
 {
+    /** @staticvar string */
+    const DELTA_PRODUCT_TABLE = 'pim_magento_delta_product_export';
+
+    /** @staticvar string */
+    const DELTA_ASSOCIATION_TABLE = 'pim_magento_delta_product_association_export';
+
     /**
      * @var boolean
      */
@@ -27,10 +34,16 @@ class ProductExportManager
     /** @var string */
     protected $productExportClass;
 
+    /**@var string */
+    protected $assoExportClass;
+
     /**
      * @var EntityRepository
      */
     protected $productExportRepository;
+
+    /** @var \Doctrine\ORM\EntityRepository */
+    protected $assoExportRepository;
 
     /**
      * @var EntityRepository
@@ -42,78 +55,120 @@ class ProductExportManager
      *
      * @param EntityManager $entityManager      Entity manager for other entitites
      * @param string        $productExportClass ProductExport class
+     * @param string        $assoExportClass    ProductExport class
      * @param string        $productClass       Product class
      * @param boolean       $productValueDelta  Should we do a delta on product values
      */
     public function __construct(
         EntityManager $entityManager,
         $productExportClass,
+        $assoExportClass,
         $productClass,
         $productValueDelta = false
     ) {
         $this->entityManager           = $entityManager;
         $this->productExportClass      = $productExportClass;
+        $this->assoExportClass         = $assoExportClass;
         $this->productExportRepository = $this->entityManager->getRepository($this->productExportClass);
+        $this->assoExportRepository    = $this->entityManager->getRepository($this->assoExportClass);
         $this->productRepository       = $this->entityManager->getRepository($productClass);
         $this->productValueDelta       = $productValueDelta;
-    }
-    /**
-     * Update product export dates for the given products
-     * @param array       $products
-     * @param JobInstance $jobInstance
-     */
-    public function updateProductExports($products, JobInstance $jobInstance)
-    {
-        foreach ($products as $product) {
-            $this->updateProductExport($product->getIdentifier(), $jobInstance);
-        }
     }
 
     /**
      * Update product export date for the given product
+     *
      * @param string      $identifier
      * @param JobInstance $jobInstance
      */
     public function updateProductExport($identifier, JobInstance $jobInstance)
     {
-        $now = new \DateTime('now', new \DateTimeZone('UTC'));
         $product = $this->productRepository->findByReference((string) $identifier);
 
         if (null != $product) {
-            $productExport = $this->productExportRepository->findOneBy(array(
-                'product'     => $product,
-                'jobInstance' => $jobInstance,
-            ));
+            $productExport = $this->productExportRepository->findOneBy(
+                array(
+                    'product'     => $product,
+                    'jobInstance' => $jobInstance,
+                )
+            );
 
-            $conn = $this->entityManager->getConnection();
-
-            $jobInstance->getId();
-            $product->getId();
-
-            if (null === $productExport) {
-                $sql = '
-                    INSERT INTO pim_magento_delta_product_export
-                    (product_id, job_instance_id, last_export)
-                    VALUES (:product_id, :job_instance_id, :last_export)
-                ';
-            } else {
-                $sql = '
-                    UPDATE pim_magento_delta_product_export
-                    SET last_export = :last_export
-                    WHERE product_id = :product_id AND job_instance_id = :job_instance_id
-                ';
-            }
-
-            $q = $conn->prepare($sql);
-            $last_export = $now->format('Y-m-d H:i:s');
-            $productId = $product->getId();
-            $jobInstanceId = $jobInstance->getId();
-
-            $q->bindParam(':last_export', $last_export, PDO::PARAM_STR);
-            $q->bindParam(':product_id', $productId, PDO::PARAM_INT);
-            $q->bindParam(':job_instance_id', $jobInstanceId, PDO::PARAM_INT);
-            $q->execute();
+            $this->updateExport(
+                $productExport,
+                static::DELTA_PRODUCT_TABLE,
+                $product,
+                $jobInstance
+            );
         }
+    }
+
+    /**
+     * Update product association export date for the given product
+     *
+     * @param string      $identifier
+     * @param JobInstance $jobInstance
+     */
+    public function updateProductAssociationExport($identifier, JobInstance $jobInstance)
+    {
+        $product = $this->productRepository->findByReference((string) $identifier);
+
+        if (null != $product) {
+            $productAssoExport = $this->assoExportRepository->findOneBy(
+                array(
+                    'product'     => $product,
+                    'jobInstance' => $jobInstance,
+                )
+            );
+
+            $this->updateExport(
+                $productAssoExport,
+                static::DELTA_ASSOCIATION_TABLE,
+                $product,
+                $jobInstance
+            );
+        }
+    }
+
+    /**
+     * Update export date for the given product
+     *
+     * @param string           $export
+     * @param string           $table
+     * @param ProductInterface $product
+     * @param JobInstance      $jobInstance
+     */
+    protected function updateExport($export, $table, ProductInterface $product, JobInstance $jobInstance)
+    {
+        $now = new \DateTime('now', new \DateTimeZone('UTC'));
+
+        $conn = $this->entityManager->getConnection();
+
+        $jobInstance->getId();
+        $product->getId();
+
+        if (null === $export) {
+            $sql = "
+                INSERT INTO $table
+                (product_id, job_instance_id, last_export)
+                VALUES (:product_id, :job_instance_id, :last_export)
+            ";
+        } else {
+            $sql = "
+                UPDATE $table
+                SET last_export = :last_export
+                WHERE product_id = :product_id AND job_instance_id = :job_instance_id
+            ";
+        }
+
+        $query = $conn->prepare($sql);
+        $lastExport = $now->format('Y-m-d H:i:s');
+        $productId = $product->getId();
+        $jobInstanceId = $jobInstance->getId();
+
+        $query->bindParam(':last_export', $lastExport, PDO::PARAM_STR);
+        $query->bindParam(':product_id', $productId, PDO::PARAM_INT);
+        $query->bindParam(':job_instance_id', $jobInstanceId, PDO::PARAM_INT);
+        $query->execute();
     }
 
     /**

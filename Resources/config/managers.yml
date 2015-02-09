@@ -87,6 +87,7 @@ services:
         arguments:
             - @doctrine.orm.entity_manager
             - %pim_magento_connector.entity.delta_product_export.class%
+            - %pim_magento_connector.entity.delta_product_association_export.class%
             - %pim_catalog.entity.product.class%
 
     pim_magento_connector.manager.product_value_export:

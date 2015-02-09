@@ -53,7 +53,7 @@ connector:
                 export_simple_products:
                     title:     pim_magento_connector.steps.simple_product_export.export.title
                     services:
-                        reader:    pim_magento_connector.reader.doctrine.product_delta
+                        reader:    pim_magento_connector.reader.orm.product_delta
                         processor: pim_magento_connector.processor.product
                         writer:    pim_magento_connector.writer.product_delta
                     parameters:
@@ -69,9 +69,9 @@ connector:
                 export_product_association:
                     title:     pim_magento_connector.steps.association_product_export.export.title
                     services:
-                        reader:    pim_base_connector.reader.doctrine.product
+                        reader:    pim_magento_connector.reader.orm.product_association_delta
                         processor: pim_magento_connector.processor.product_association
-                        writer:    pim_magento_connector.writer.product_association
+                        writer:    pim_magento_connector.writer.product_association_delta
                     parameters:
                         batch_size: 1
 

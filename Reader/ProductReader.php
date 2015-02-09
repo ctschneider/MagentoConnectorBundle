@@ -75,15 +75,6 @@ class ProductReader extends PimProductReader
     }
 
     /**
-     * Update the product export date (will be removed later)
-     * @param AbstractProduct $product
-     */
-    protected function updateProductExport(AbstractProduct $product)
-    {
-        $this->productExportManager->updateProductExport($product->getIdentifier(), $this->jobInstance);
-    }
-
-    /**
      * {@inheritdoc}
      */
     public function setStepExecution(StepExecution $stepExecution)
