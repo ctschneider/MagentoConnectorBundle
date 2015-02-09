@@ -2,8 +2,11 @@
 
 namespace Pim\Bundle\MagentoConnectorBundle\Processor;
 
+use Doctrine\Common\Collections\Collection;
+use Pim\Bundle\CatalogBundle\Entity\Channel;
 use Pim\Bundle\CatalogBundle\Manager\ChannelManager;
 use Akeneo\Bundle\BatchBundle\Item\InvalidItemException;
+use Pim\Bundle\CatalogBundle\Model\ProductInterface;
 use Pim\Bundle\MagentoConnectorBundle\Webservice\Webservice;
 use Pim\Bundle\MagentoConnectorBundle\Manager\PriceMappingManager;
 use Pim\Bundle\MagentoConnectorBundle\Guesser\WebserviceGuesser;
@@ -34,6 +37,9 @@ class ConfigurableProcessor extends AbstractProductProcessor
      * @var GroupManager
      */
     protected $groupManager;
+
+    /** @var array */
+    protected $processedIds = [];
 
     /**
      * @param WebserviceGuesser                   $webserviceGuesser
@@ -223,6 +229,7 @@ class ConfigurableProcessor extends AbstractProductProcessor
      */
     protected function getProductsForGroups(array $products, array $groupsIds)
     {
+        $channel = $this->channelManager->getChannelByCode($this->getChannel());
         $groups = [];
 
         foreach ($products as $product) {
@@ -230,6 +237,12 @@ class ConfigurableProcessor extends AbstractProductProcessor
                 $groupId = $group->getId();
 
                 if (in_array($groupId, $groupsIds)) {
+                    $groupProducts = $group->getProducts();
+                    $exportableProducts = $this->getExportableProducts(
+                        $channel,
+                        $groupProducts
+                    );
+
                     if (!isset($groups[$groupId])) {
                         $groups[$groupId] = [
                             'group'    => $group,
@@ -237,12 +250,95 @@ class ConfigurableProcessor extends AbstractProductProcessor
                         ];
                     }
 
-                    $groups[$groupId]['products'][] = $product;
+                    if (!isset($this->processedIds[$groupId])) {
+                        $this->processedIds[$groupId] = [];
+                    }
+
+                    foreach ($exportableProducts as $exportableProduct) {
+                        $exportableProductId = $exportableProduct->getId();
+                        if (!in_array($exportableProductId, $this->processedIds[$groupId])) {
+                            $groups[$groupId]['products'][] = $exportableProduct;
+                            $this->processedIds[$groupId][] = $exportableProductId;
+                        }
+                    }
                 }
             }
         }
 
         return $groups;
+    }
+
+    /**
+     *
+     * Returns ready to export variant group products
+     *
+     * @param Channel    $channel
+     * @param Collection $groupProducts
+     *
+     * @return array
+     */
+    protected function getExportableProducts(Channel $channel, Collection $groupProducts)
+    {
+        $exportableProducts = [];
+        $rootCategoryId     = $channel->getCategory()->getId();
+
+        foreach ($groupProducts as $product) {
+            $productCategories = $product->getCategories()->toArray();
+            if ($this->isProductComplete($product, $channel) &&
+                false !== $productCategories &&
+                $this->doesProductBelongToChannel($productCategories, $rootCategoryId)
+            ) {
+                $exportableProducts[] = $product;
+            }
+        }
+
+        return $exportableProducts;
+
+    }
+
+    /**
+     * Is the given product complete for the given channel?
+     *
+     * @param ProductInterface $product
+     * @param Channel $channel
+     *
+     * @return bool
+     */
+    protected function isProductComplete(ProductInterface $product, Channel $channel)
+    {
+        $isComplete = true;
+        $completenesses = $product->getCompletenesses()->toArray();
+
+        while ((list($key, $completeness) = each($completenesses)) && $isComplete) {
+            if ($completeness->getChannel()->getId() === $channel->getId() &&
+                $completeness->getRatio() < 100
+            ) {
+                $isComplete = false;
+            }
+        }
+
+        return $isComplete;
+    }
+
+    /**
+    * Compute the belonging of a product to a channel.
+    * Validating one of its categories has the same root as the channel root category.
+    *
+    * @param \ArrayIterator|array $productCategories
+    * @param int                  $rootCategoryId
+    *
+    * @return bool
+    */
+    protected function doesProductBelongToChannel($productCategories, $rootCategoryId)
+    {
+        $isInChannel = false;
+        while ((list($key, $category) = each($productCategories)) && !$isInChannel) {
+            if ($category->getRoot() === $rootCategoryId) {
+                $isInChannel = true;
+            }
+        }
+
+        return $isInChannel;
     }
 
     /**
