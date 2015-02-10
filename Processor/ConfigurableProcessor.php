@@ -119,35 +119,57 @@ class ConfigurableProcessor extends AbstractProductProcessor
             }
 
             foreach ($configurables as $configurable) {
-                if (empty($configurable['products'])) {
-                    $this->addWarning('The variant group is not associated to any products', [], $configurable);
-                }
-
-                if ($this->magentoConfigurableExist($configurable, $magentoConfigurables)) {
-                    $context = array_merge(
-                        $this->globalContext,
-                        ['attributeSetId' => 0, 'create' => false]
-                    );
-                } else {
-                    $groupFamily = $this->getGroupFamily($configurable);
-                    $context     = array_merge(
-                        $this->globalContext,
-                        [
-                            'attributeSetId' => $this->getAttributeSetId($groupFamily->getCode(), $configurable),
-                            'create'         => true
-                        ]
-                    );
-                }
-
-                try {
-                    $processedItems[] = $this->normalizeConfigurable($configurable, $context);
-                } catch (\Exception $e) {
-                    $this->addWarning($e->getMessage(), [], $configurable);
-                }
+                $processedItems[] = $this->processConfigurable($configurable, $magentoConfigurables);
             }
         }
 
         return $processedItems;
+    }
+
+    /**
+     * Processes configurables
+     *
+     * @param array $configurable
+     * @param array $magentoConfigurables
+     *
+     * @return array|void
+     *
+     * @throws InvalidItemException
+     */
+    protected function processConfigurable(array $configurable, array $magentoConfigurables)
+    {
+        if (empty($configurable['products'])) {
+            $this->addWarning(
+                'The variant group is not associated to any products or product has already been send.',
+                [],
+                $configurable
+            );
+            return;
+        }
+
+        if ($this->magentoConfigurableExist($configurable, $magentoConfigurables)) {
+            $context = array_merge(
+                $this->globalContext,
+                ['attributeSetId' => 0, 'create' => false]
+            );
+        } else {
+            $groupFamily = $this->getGroupFamily($configurable);
+            $context     = array_merge(
+                $this->globalContext,
+                [
+                    'attributeSetId' => $this->getAttributeSetId($groupFamily->getCode(), $configurable),
+                    'create'         => true
+                ]
+            );
+        }
+
+        try {
+            return $this->normalizeConfigurable($configurable, $context);
+        } catch (\Exception $e) {
+            $this->addWarning($e->getMessage(), [], $configurable);
+        }
+
+        return;
     }
 
     /**
@@ -306,18 +328,16 @@ class ConfigurableProcessor extends AbstractProductProcessor
      */
     protected function isProductComplete(ProductInterface $product, Channel $channel)
     {
-        $isComplete = true;
         $completenesses = $product->getCompletenesses()->toArray();
-
-        while ((list($key, $completeness) = each($completenesses)) && $isComplete) {
+        foreach ($completenesses as $completeness) {
             if ($completeness->getChannel()->getId() === $channel->getId() &&
                 $completeness->getRatio() < 100
             ) {
-                $isComplete = false;
+                return false;
             }
         }
 
-        return $isComplete;
+        return true;
     }
 
     /**
@@ -331,14 +351,13 @@ class ConfigurableProcessor extends AbstractProductProcessor
     */
     protected function doesProductBelongToChannel($productCategories, $rootCategoryId)
     {
-        $isInChannel = false;
-        while ((list($key, $category) = each($productCategories)) && !$isInChannel) {
+        foreach ($productCategories as $category) {
             if ($category->getRoot() === $rootCategoryId) {
-                $isInChannel = true;
+                return true;
             }
         }
 
-        return $isInChannel;
+        return false;
     }
 
     /**
