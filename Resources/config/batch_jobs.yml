@@ -74,6 +74,16 @@ connector:
                         writer:    pim_magento_connector.writer.product_association_delta
                     parameters:
                         batch_size: 1
+                prune_simple_products:
+                    title: pim_magento_connector.steps.simple_product_clean.clean.title
+                    class: "%pim_magento_connector.step.prune.class%"
+                    services:
+                        cleaner: pim_magento_connector.cleaner.product
+                prune_configurable_products:
+                    title: pim_magento_connector.steps.configurable_product_clean.clean.title
+                    class: "%pim_magento_connector.step.prune.class%"
+                    services:
+                        cleaner: pim_magento_connector.cleaner.configurable
 
         magento_category_export:
             title: pim_magento_connector.jobs.category_export.title
