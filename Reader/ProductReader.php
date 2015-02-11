@@ -71,7 +71,7 @@ class ProductReader extends PimProductReader
             }
         }
 
-        return;
+        return null;
     }
 
     /**

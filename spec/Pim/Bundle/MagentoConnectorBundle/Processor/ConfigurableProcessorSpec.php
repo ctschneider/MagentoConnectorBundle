@@ -4,7 +4,10 @@ namespace spec\Pim\Bundle\MagentoConnectorBundle\Processor;
 
 use Akeneo\Bundle\BatchBundle\Entity\StepExecution;
 use Akeneo\Bundle\BatchBundle\Event\EventInterface;
+use Doctrine\Common\Collections\ArrayCollection;
+use Pim\Bundle\CatalogBundle\Entity\Category;
 use PhpSpec\ObjectBehavior;
+use Pim\Bundle\CatalogBundle\Entity\Channel;
 use Pim\Bundle\CatalogBundle\Entity\Family;
 use Pim\Bundle\CatalogBundle\Entity\Group;
 use Pim\Bundle\CatalogBundle\Manager\ChannelManager;
@@ -53,7 +56,9 @@ class ConfigurableProcessorSpec extends ObjectBehavior
         MagentoSoapClientParametersRegistry $clientParametersRegistry,
         MagentoSoapClientParameters $clientParameters,
         StepExecution $stepExecution,
-        EventDispatcher $eventDispatcher
+        EventDispatcher $eventDispatcher,
+        Channel $channel,
+        Category $category
     ) {
         $this->beConstructedWith(
             $webserviceGuesser,
@@ -128,6 +133,14 @@ class ConfigurableProcessorSpec extends ObjectBehavior
         $groupManager->getRepository()->willReturn($groupRepository);
 
         $group->getId()->willReturn(1);
+
+        $channelManager->getChannelByCode('magento')->willReturn($channel);
+
+        $this->setChannel('magento');
+
+        $channel->getCategory()->willReturn($category);
+
+        $category->getId()->willReturn(1);
     }
 
     function it_processes_products(
@@ -135,13 +148,16 @@ class ConfigurableProcessorSpec extends ObjectBehavior
         $webservice,
         $group,
         $configurableNormalizer,
-        Product $product
+        Product $product,
+        ArrayCollection $groupProducts
     ) {
         $groupRepository->getVariantGroupIds()->willReturn([0, 1]);
 
         $product->getGroups()->willReturn([$group]);
 
         $group->getCode()->willReturn('abcd');
+
+        $group->getProducts()->willReturn($groupProducts);
 
         $configurable = ['group' => $group, 'products' => [$product]];
 
@@ -160,7 +176,8 @@ class ConfigurableProcessorSpec extends ObjectBehavior
         $group,
         $configurableNormalizer,
         Product $product,
-        Family $family
+        Family $family,
+        ArrayCollection $groupProducts
     ) {
         $groupRepository->getVariantGroupIds()->willReturn([0, 1]);
 
@@ -170,6 +187,8 @@ class ConfigurableProcessorSpec extends ObjectBehavior
         $group->getCode()->willReturn('abcd');
 
         $family->getCode()->willReturn('family_code');
+
+        $group->getProducts()->willReturn($groupProducts);
 
         $configurable = ['group' => $group, 'products' => [$product]];
 
@@ -190,7 +209,8 @@ class ConfigurableProcessorSpec extends ObjectBehavior
         $configurableNormalizer,
         $eventDispatcher,
         Product $product,
-        Family $family
+        Family $family,
+        ArrayCollection $groupProducts
     ) {
         $groupRepository->getVariantGroupIds()->willReturn([0, 1]);
 
@@ -200,6 +220,8 @@ class ConfigurableProcessorSpec extends ObjectBehavior
         $group->getCode()->willReturn('abcd');
 
         $family->getCode()->willReturn('family_code');
+
+        $group->getProducts()->willReturn($groupProducts);
 
         $configurable = ['group' => $group, 'products' => [$product]];
 
@@ -228,7 +250,8 @@ class ConfigurableProcessorSpec extends ObjectBehavior
         $group,
         $configurableNormalizer,
         Product $product,
-        Family $family
+        Family $family,
+        ArrayCollection $groupProducts
     ) {
         $groupRepository->getVariantGroupIds()->willReturn([0, 1]);
 
@@ -238,6 +261,8 @@ class ConfigurableProcessorSpec extends ObjectBehavior
         $group->getCode()->willReturn('abcd');
 
         $family->getCode()->willReturn('family_code');
+
+        $group->getProducts()->willReturn($groupProducts);
 
         $configurable = ['group' => $group, 'products' => [$product]];
 

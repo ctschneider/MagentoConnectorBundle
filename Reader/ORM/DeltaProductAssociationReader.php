@@ -1,6 +1,6 @@
 <?php
 
-namespace Pim\Bundle\MagentoConnectorBundle\Reader;
+namespace Pim\Bundle\MagentoConnectorBundle\Reader\ORM;
 
 /**
  * Delta product association reader

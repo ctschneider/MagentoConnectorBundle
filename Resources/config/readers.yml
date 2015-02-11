@@ -5,9 +5,9 @@ parameters:
     pim_magento_connector.reader.orm.attribute.class:                 Pim\Bundle\MagentoConnectorBundle\Reader\ORM\AttributeReader
     pim_magento_connector.reader.doctrine.product.class:              Pim\Bundle\MagentoConnectorBundle\Reader\ProductReader
     pim_base_connector.reader.doctrine.obsoleteproduct.class:         Pim\Bundle\BaseConnectorBundle\Reader\Doctrine\ObsoleteProductReader
-    pim_magento_connector.reader.orm.configurable_delta.class:        Pim\Bundle\MagentoConnectorBundle\Reader\DeltaConfigurableReader
-    pim_magento_connector.reader.orm.product_delta.class:             Pim\Bundle\MagentoConnectorBundle\Reader\DeltaProductReader
-    pim_magento_connector.reader.orm.product_association_delta.class: Pim\Bundle\MagentoConnectorBundle\Reader\DeltaProductAssociationReader
+    pim_magento_connector.reader.orm.configurable_delta.class:        Pim\Bundle\MagentoConnectorBundle\Reader\ORM\DeltaConfigurableReader
+    pim_magento_connector.reader.orm.product_delta.class:             Pim\Bundle\MagentoConnectorBundle\Reader\ORM\DeltaProductReader
+    pim_magento_connector.reader.orm.product_association_delta.class: Pim\Bundle\MagentoConnectorBundle\Reader\ORM\DeltaProductAssociationReader
 
 services:
     pim_magento_connector.reader.doctrine.bulk_simple_product:

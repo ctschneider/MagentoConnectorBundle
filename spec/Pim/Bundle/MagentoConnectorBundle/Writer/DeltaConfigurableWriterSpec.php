@@ -1,35 +1,38 @@
 <?php
+
 namespace spec\Pim\Bundle\MagentoConnectorBundle\Writer;
 
 use Akeneo\Bundle\BatchBundle\Entity\JobExecution;
 use Akeneo\Bundle\BatchBundle\Entity\JobInstance;
-use Akeneo\Bundle\BatchBundle\Event\EventInterface;
-use Pim\Bundle\MagentoConnectorBundle\Guesser\WebserviceGuesser;
-use Pim\Bundle\CatalogBundle\Manager\ChannelManager;
-use Pim\Bundle\MagentoConnectorBundle\Manager\ProductExportManager;
 use Akeneo\Bundle\BatchBundle\Entity\StepExecution;
+use Akeneo\Bundle\BatchBundle\Event\EventInterface;
+use PhpSpec\ObjectBehavior;
+use Pim\Bundle\CatalogBundle\Manager\ChannelManager;
+use Pim\Bundle\MagentoConnectorBundle\Guesser\WebserviceGuesser;
+use Pim\Bundle\MagentoConnectorBundle\Manager\ConfigurableExportManager;
 use Pim\Bundle\MagentoConnectorBundle\Webservice\MagentoSoapClientParameters;
 use Pim\Bundle\MagentoConnectorBundle\Webservice\MagentoSoapClientParametersRegistry;
-use PhpSpec\ObjectBehavior;
 use Pim\Bundle\MagentoConnectorBundle\Webservice\Webservice;
 use Prophecy\Argument;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 /**
- * @author    Willy Mesnage <willy.mesnage@akeneo.com>
- * @copyright 2014 Akeneo SAS (http://www.akeneo.com)
+ * Class DeltaConfigurableWriterSpec
+ *
+ * @author    Damien Carcel (https://github.com/damien-carcel)
+ * @copyright 2015 Akeneo SAS (http://www.akeneo.com)
  * @license   http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
-class DeltaProductWriterSpec extends ObjectBehavior
+class DeltaConfigurableWriterSpec extends ObjectBehavior
 {
     function let(
         ChannelManager $channelManager,
+        ConfigurableExportManager $configExportManager,
         EventDispatcher $eventDispatcher,
         JobExecution $jobExecution,
         JobInstance $jobInstance,
         MagentoSoapClientParameters $clientParameters,
         MagentoSoapClientParametersRegistry $clientParamsRegistry,
-        ProductExportManager $productExportManager,
         StepExecution $stepExecution,
         Webservice $webservice,
         WebserviceGuesser $webserviceGuesser
@@ -38,7 +41,7 @@ class DeltaProductWriterSpec extends ObjectBehavior
             $webserviceGuesser,
             $channelManager,
             $clientParamsRegistry,
-            $productExportManager
+            $configExportManager
         );
         $this->setStepExecution($stepExecution);
         $this->setEventDispatcher($eventDispatcher);
@@ -46,7 +49,6 @@ class DeltaProductWriterSpec extends ObjectBehavior
         $clientParamsRegistry
             ->getInstance(null, null, null, '/api/soap/?wsdl', 'default', null, null)
             ->willReturn($clientParameters);
-
         $webserviceGuesser->getWebservice($clientParameters)->willReturn($webservice);
 
         $stepExecution->getJobExecution()->willReturn($jobExecution);
@@ -56,7 +58,7 @@ class DeltaProductWriterSpec extends ObjectBehavior
     function it_updates_a_product(
         $webservice,
         $stepExecution,
-        $productExportManager,
+        $configExportManager,
         $jobInstance
     ) {
         $products = [
@@ -82,13 +84,13 @@ class DeltaProductWriterSpec extends ObjectBehavior
 
         $this->write($products);
 
-        $productExportManager->updateProductExport('sku', $jobInstance)->shouldBeCalled();
+        //$configExportManager->setLastExportDate('sku', $jobInstance)->shouldBeCalled();
     }
 
     function it_creates_a_product(
         $webservice,
         $stepExecution,
-        $productExportManager,
+        $configExportManager,
         $jobInstance
     ) {
         $products = [
@@ -118,13 +120,13 @@ class DeltaProductWriterSpec extends ObjectBehavior
 
         $this->write($products);
 
-        $productExportManager->updateProductExport('sku', $jobInstance)->shouldBeCalled();
+        //$configExportManager->setLastExportDate('sku', $jobInstance)->shouldBeCalled();
     }
 
     function it_updates_a_product_and_prunes_old_images(
         $webservice,
         $stepExecution,
-        $productExportManager,
+        $configExportManager,
         $jobInstance
     ) {
         $products = [
@@ -152,7 +154,7 @@ class DeltaProductWriterSpec extends ObjectBehavior
 
         $this->write($products);
 
-        $productExportManager->updateProductExport('sku', $jobInstance)->shouldBeCalled();
+        //$configExportManager->setLastExportDate('sku', $jobInstance)->shouldBeCalled();
     }
 
     function it_fails_if_something_went_wrong_when_it_updates_a_product(
