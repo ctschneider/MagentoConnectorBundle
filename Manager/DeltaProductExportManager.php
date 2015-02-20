@@ -5,7 +5,6 @@ namespace Pim\Bundle\MagentoConnectorBundle\Manager;
 use Doctrine\ORM\EntityRepository;
 use PDO;
 use Doctrine\ORM\EntityManager;
-use Pim\Bundle\CatalogBundle\Model\AbstractProduct;
 use Akeneo\Bundle\BatchBundle\Entity\JobInstance;
 use Pim\Bundle\CatalogBundle\Model\ProductInterface;
 use Pim\Bundle\CatalogBundle\Repository\ProductRepositoryInterface;
@@ -22,6 +21,9 @@ class DeltaProductExportManager
     /** @staticvar string */
     const DELTA_PRODUCT_TABLE = 'pim_magento_delta_product_export';
 
+    /** @staticvar string */
+    const DELTA_ASSOCIATION_TABLE = 'pim_magento_delta_product_association_export';
+
     /** @var boolean */
     protected $productValueDelta;
 
@@ -31,23 +33,29 @@ class DeltaProductExportManager
     /** @var EntityRepository */
     protected $productExportRepository;
 
+    /** @var EntityRepository */
+    protected $assoExportRepository;
+
     /** @var ProductRepositoryInterface */
     protected $productRepository;
 
     /**
      * @param EntityManager                $entityManager           Entity manager for other entities
      * @param EntityRepository             $productExportRepository Product export repository
+     * @param EntityRepository             $assoExportRepository    Association export repository
      * @param ProductRepositoryInterface   $productRepository       Product repository
      * @param boolean                      $productValueDelta       Should we do a delta on product values
      */
     public function __construct(
         EntityManager $entityManager,
         EntityRepository $productExportRepository,
+        EntityRepository $assoExportRepository,
         ProductRepositoryInterface $productRepository,
         $productValueDelta = false
     ) {
         $this->entityManager           = $entityManager;
         $this->productExportRepository = $productExportRepository;
+        $this->assoExportRepository    = $assoExportRepository;
         $this->productRepository       = $productRepository;
         $this->productValueDelta       = $productValueDelta;
     }
@@ -80,11 +88,38 @@ class DeltaProductExportManager
     }
 
     /**
+     * Update product association export date for the given product
+     *
+     * @param JobInstance $jobInstance
+     * @param string      $identifier
+     */
+    public function updateProductAssociationExport(JobInstance $jobInstance, $identifier)
+    {
+        $product = $this->productRepository->findByReference((string) $identifier);
+
+        if (null != $product) {
+            $productAssoExport = $this->assoExportRepository->findOneBy(
+                array(
+                    'product'     => $product,
+                    'jobInstance' => $jobInstance,
+                )
+            );
+
+            $this->updateExport(
+                $product,
+                $jobInstance,
+                $productAssoExport,
+                static::DELTA_ASSOCIATION_TABLE
+            );
+        }
+    }
+
+    /**
      * Update export date for the given product
      *
      * @param ProductInterface $product
      * @param JobInstance      $jobInstance
-     * @param mixed            $export      DeltaProductExport or null
+     * @param mixed            $export
      * @param string           $table
      */
     protected function updateExport(

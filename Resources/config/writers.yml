@@ -1,11 +1,12 @@
 parameters:
-    pim_magento_connector.writer.product.class:             Pim\Bundle\MagentoConnectorBundle\Writer\ProductWriter
-    pim_magento_connector.writer.product_delta.class:       Pim\Bundle\MagentoConnectorBundle\Writer\DeltaProductWriter
-    pim_magento_connector.writer.category.class:            Pim\Bundle\MagentoConnectorBundle\Writer\CategoryWriter
-    pim_magento_connector.writer.product_association.class: Pim\Bundle\MagentoConnectorBundle\Writer\ProductAssociationWriter
-    pim_magento_connector.writer.option.class:              Pim\Bundle\MagentoConnectorBundle\Writer\OptionWriter
-    pim_magento_connector.writer.attribute.class:           Pim\Bundle\MagentoConnectorBundle\Writer\AttributeWriter
-    pim_magento_connector.writer.family.class:              Pim\Bundle\MagentoConnectorBundle\Writer\AttributeSetWriter
+    pim_magento_connector.writer.product.class:                   Pim\Bundle\MagentoConnectorBundle\Writer\ProductWriter
+    pim_magento_connector.writer.product_delta.class:             Pim\Bundle\MagentoConnectorBundle\Writer\DeltaProductWriter
+    pim_magento_connector.writer.category.class:                  Pim\Bundle\MagentoConnectorBundle\Writer\CategoryWriter
+    pim_magento_connector.writer.product_association.class:       Pim\Bundle\MagentoConnectorBundle\Writer\ProductAssociationWriter
+    pim_magento_connector.writer.option.class:                    Pim\Bundle\MagentoConnectorBundle\Writer\OptionWriter
+    pim_magento_connector.writer.attribute.class:                 Pim\Bundle\MagentoConnectorBundle\Writer\AttributeWriter
+    pim_magento_connector.writer.family.class:                    Pim\Bundle\MagentoConnectorBundle\Writer\AttributeSetWriter
+    pim_magento_connector.writer.delta_product_association.class: Pim\Bundle\MagentoConnectorBundle\Writer\DeltaProductAssociationWriter
 
 services:
     pim_magento_connector.writer.product:
@@ -23,6 +24,13 @@ services:
             - '@pim_magento_connector.manager.delta_product_export'
         calls:
             - [setEventDispatcher, [@event_dispatcher]]
+
+    pim_magento_connector.writer.delta_product_association:
+        class: %pim_magento_connector.writer.delta_product_association.class%
+        arguments:
+            - '@pim_magento_connector.guesser.magento_webservice'
+            - '@pim_magento_connector.webservice.magento_soap_client_parameters_registry'
+            - '@pim_magento_connector.manager.delta_product_export'
 
     pim_magento_connector.writer.product_association:
         class: %pim_magento_connector.writer.product_association.class%

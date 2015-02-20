@@ -85,4 +85,5 @@ services:
         arguments:
             - '@doctrine.orm.entity_manager'
             - '@pim_magento_connector.repository.delta_product_export'
+            - '@pim_magento_connector.repository.delta_product_association_export'
             - '@pim_catalog.repository.product'

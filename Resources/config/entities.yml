@@ -5,3 +5,4 @@ parameters:
     pim_magento_connector.entity.attribute_mapping.class:                Pim\Bundle\MagentoConnectorBundle\Entity\MagentoAttributeMapping
     pim_magento_connector.entity.simple_mapping.class:                   Pim\Bundle\MagentoConnectorBundle\Entity\SimpleMapping
     pim_magento_connector.entity.delta_product_export.class:             Pim\Bundle\MagentoConnectorBundle\Entity\DeltaProductExport
+    pim_magento_connector.entity.delta_product_association_export.class: Pim\Bundle\MagentoConnectorBundle\Entity\DeltaProductAssociationExport
